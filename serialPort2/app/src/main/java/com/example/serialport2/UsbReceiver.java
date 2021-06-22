@@ -48,6 +48,7 @@ public class UsbReceiver extends BroadcastReceiver {
 		mActivity = activity;
 		mContext = activity.getBaseContext();
 		mSerial = serial;
+		Toast.makeText(mContext, "1-UsbReceiver", Toast.LENGTH_SHORT).show();
 	}
 
 	public int GetTextFontSize()
@@ -64,10 +65,12 @@ public class UsbReceiver extends BroadcastReceiver {
 	int loadDefaultBaudrate() {
 		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(mContext);
 		String res = pref.getString("baudrate_list", Integer.toString(FTDriver.BAUD9600));
+		Toast.makeText(mContext, "2-loadDefaultBaudrate", Toast.LENGTH_SHORT).show();
 		return Integer.valueOf(res);
 	}
 
 	void loadDefaultSettingValues() {
+		Toast.makeText(mContext, "3-loadDefaultSettingValues", Toast.LENGTH_SHORT).show();
 		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(mContext);
 		String res = pref.getString("display_list", Integer.toString(FTDriverUtil.DISP_CHAR));
 		mDisplayType = Integer.valueOf(res);
@@ -123,6 +126,7 @@ public class UsbReceiver extends BroadcastReceiver {
 	}
 
 	public void openUsbSerial() {
+		Toast.makeText(mContext, "4-openUsbSerial", Toast.LENGTH_SHORT).show();
 		if (!mSerial.isConnected()) {
 			if (SHOW_DEBUG) {
 				Log.d(TAG, "onNewIntent begin");
@@ -143,24 +147,29 @@ public class UsbReceiver extends BroadcastReceiver {
 	}
 
 	public void closeUsbSerial() {
+		Toast.makeText(mContext, "5-closeUsbSerial", Toast.LENGTH_SHORT).show();
 		detachedUi();
 		mStop = true;
 		mSerial.end();
 	}
 
 	public void writeDataToSerial(String strWrite) {
+		Toast.makeText(mContext, "6-writeDateToSerial", Toast.LENGTH_SHORT).show();
 		strWrite = FTDriverUtil.changeLinefeedcode(strWrite);
 		if (SHOW_DEBUG) {
 			Log.d(TAG, "FTDriver Write(" + strWrite.length() + ") : " + strWrite);
 		}
 		
-		if(mSerial.isConnected())
+		if(mSerial.isConnected()) {
 			mSerial.write(strWrite.getBytes(), strWrite.length());
+			mainloop();
+		}
 		else
 			Toast.makeText(mContext, "Usb is disconnection", Toast.LENGTH_SHORT).show();
 	}
 
 	public void mainloop() {
+		Toast.makeText(mContext, "7-mainloop", Toast.LENGTH_SHORT).show();
 		mStop = false;
 		mRunningMainLoop = true;
 		Toast.makeText(mContext, "connected", Toast.LENGTH_SHORT).show();
