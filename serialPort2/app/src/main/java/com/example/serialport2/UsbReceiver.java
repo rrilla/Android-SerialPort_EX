@@ -24,7 +24,8 @@ public class UsbReceiver extends BroadcastReceiver {
 	private Handler mHandler = new Handler();
 	private StringBuilder mText;
 
-	private static final String ACTION_USB_PERMISSION = "kr.co.andante.mobiledgs.USB_PERMISSION";
+//	private static final String ACTION_USB_PERMISSION = "kr.co.andante.mobiledgs.USB_PERMISSION";
+	private static final String ACTION_USB_PERMISSION = "com.example.serialport2.USB_PERMISSION";
 
 	private boolean mStop = false;
 	private boolean mRunningMainLoop = false;
@@ -210,6 +211,7 @@ public class UsbReceiver extends BroadcastReceiver {
 						mHandler.post(new Runnable() {
 							public void run() {
 								((MainActivity)mActivity).onSetText(mText.toString());
+								Toast.makeText(mContext, mText.toString(), Toast.LENGTH_SHORT).show();
 							}
 						});
 					}

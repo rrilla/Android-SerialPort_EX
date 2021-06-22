@@ -89,6 +89,7 @@ public class MainActivity extends Activity {
 		btWrite.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				Toast.makeText(getApplicationContext(), "클릭", Toast.LENGTH_SHORT).show();
 				mUsbReceiver.writeDataToSerial(etWrite.getText().toString());
 			}
 		});
