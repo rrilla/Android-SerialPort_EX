@@ -1,6 +1,6 @@
 package com.example.serialport2;
 
-import kr.co.driver.serial.FTDriver;
+import com.driver.serial.FTDriver;
 import android.os.Bundle;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -18,10 +18,12 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.example.serialport2.R;
 
 @SuppressLint("InlinedApi")
-public class MainActivity extends Activity {
+public class MainActivity extends AppCompatActivity {
 
 	private FTDriver mSerial;
 	private com.example.serialport2.UsbReceiver mUsbReceiver;
@@ -89,7 +91,6 @@ public class MainActivity extends Activity {
 		btWrite.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				Toast.makeText(getApplicationContext(), "클릭", Toast.LENGTH_SHORT).show();
 				mUsbReceiver.writeDataToSerial(etWrite.getText().toString());
 			}
 		});

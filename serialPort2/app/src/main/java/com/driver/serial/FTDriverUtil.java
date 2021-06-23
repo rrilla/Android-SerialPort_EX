@@ -1,4 +1,4 @@
-package kr.co.driver.serial;
+package com.driver.serial;
 
 import android.util.Log;
 
