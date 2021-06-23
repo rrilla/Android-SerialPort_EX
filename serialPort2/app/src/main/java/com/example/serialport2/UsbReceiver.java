@@ -1,7 +1,7 @@
 package com.example.serialport2;
 
-import kr.co.driver.serial.FTDriver;
-import kr.co.driver.serial.FTDriverUtil;
+import com.driver.serial.FTDriver;
+import com.driver.serial.FTDriverUtil;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -35,8 +35,8 @@ public class UsbReceiver extends BroadcastReceiver {
 	// Default settings
 	private int mTextFontSize       = 12;
 	private Typeface mTextTypeface  = Typeface.MONOSPACE;
-	private int mDisplayType        = FTDriverUtil.DISP_CHAR;
-	private int mBaudrate           = FTDriver.BAUD9600;
+	private int mDisplayType        = FTDriverUtil.DISP_HEX;
+	private int mBaudrate           = FTDriver.BAUD115200;
 	private int mDataBits           = FTDriver.FTDI_SET_DATA_BITS_8;
 	private int mParity             = FTDriver.FTDI_SET_DATA_PARITY_NONE;
 	private int mStopBits           = FTDriver.FTDI_SET_DATA_STOP_BITS_1;
@@ -64,7 +64,7 @@ public class UsbReceiver extends BroadcastReceiver {
 	// Load default baud rate
 	int loadDefaultBaudrate() {
 		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(mContext);
-		String res = pref.getString("baudrate_list", Integer.toString(FTDriver.BAUD9600));
+		String res = pref.getString("baudrate_list", Integer.toString(FTDriver.BAUD115200));
 		Toast.makeText(mContext, "2-loadDefaultBaudrate", Toast.LENGTH_SHORT).show();
 		return Integer.valueOf(res);
 	}
@@ -72,7 +72,7 @@ public class UsbReceiver extends BroadcastReceiver {
 	void loadDefaultSettingValues() {
 		Toast.makeText(mContext, "3-loadDefaultSettingValues", Toast.LENGTH_SHORT).show();
 		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(mContext);
-		String res = pref.getString("display_list", Integer.toString(FTDriverUtil.DISP_CHAR));
+		String res = pref.getString("display_list", Integer.toString(FTDriverUtil.DISP_HEX));
 		mDisplayType = Integer.valueOf(res);
 
 		res = pref.getString("fontsize_list", Integer.toString(12));
@@ -154,14 +154,15 @@ public class UsbReceiver extends BroadcastReceiver {
 	}
 
 	public void writeDataToSerial(String strWrite) {
-		Toast.makeText(mContext, "6-writeDateToSerial", Toast.LENGTH_SHORT).show();
 		strWrite = FTDriverUtil.changeLinefeedcode(strWrite);
+		((MainActivity)mActivity).onSetText("1- " + strWrite);
 		if (SHOW_DEBUG) {
 			Log.d(TAG, "FTDriver Write(" + strWrite.length() + ") : " + strWrite);
 		}
 		
 		if(mSerial.isConnected()) {
-			mSerial.write(strWrite.getBytes(), strWrite.length());
+			int dd = mSerial.write(strWrite.getBytes(), strWrite.length());
+			((MainActivity)mActivity).onSetText("2- write값 : " + dd);
 			mainloop();
 		}
 		else
@@ -169,7 +170,7 @@ public class UsbReceiver extends BroadcastReceiver {
 	}
 
 	public void mainloop() {
-		Toast.makeText(mContext, "7-mainloop", Toast.LENGTH_SHORT).show();
+		((MainActivity)mActivity).onSetText("2- mainloop 실행");
 		mStop = false;
 		mRunningMainLoop = true;
 		Toast.makeText(mContext, "connected", Toast.LENGTH_SHORT).show();

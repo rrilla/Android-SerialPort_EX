@@ -1,5 +1,5 @@
 
-package kr.co.driver.serial;
+package com.driver.serial;
 
 /*
  * FTDI Driver Class
