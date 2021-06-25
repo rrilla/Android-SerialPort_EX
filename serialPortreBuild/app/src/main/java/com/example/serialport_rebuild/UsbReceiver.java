@@ -1,5 +1,7 @@
 package com.example.serialport_rebuild;
 
+import com.example.driver.serial.FTDriver;
+import com.example.driver.serial.FTDriverUtil;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -12,9 +14,6 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.example.driver.serial.FTDriver;
-import com.example.driver.serial.FTDriverUtil;
-
 public class UsbReceiver extends BroadcastReceiver {
 	private Boolean SHOW_DEBUG = false;
 	private String TAG = "HDJ";
@@ -25,6 +24,7 @@ public class UsbReceiver extends BroadcastReceiver {
 	private Handler mHandler = new Handler();
 	private StringBuilder mText;
 
+	//	private static final String ACTION_USB_PERMISSION = "kr.co.andante.mobiledgs.USB_PERMISSION";
 	private static final String ACTION_USB_PERMISSION = "com.example.serialport_rebuild.USB_PERMISSION";
 
 	private boolean mStop = false;
@@ -77,18 +77,18 @@ public class UsbReceiver extends BroadcastReceiver {
 
 		res = pref.getString("typeface_list", Integer.toString(3));
 		switch(Integer.valueOf(res)){
-		case 0:
-			mTextTypeface = Typeface.DEFAULT;
-			break;
-		case 1:
-			mTextTypeface = Typeface.SANS_SERIF;
-			break;
-		case 2:
-			mTextTypeface = Typeface.SERIF;
-			break;
-		case 3:
-			mTextTypeface = Typeface.MONOSPACE;
-			break;
+			case 0:
+				mTextTypeface = Typeface.DEFAULT;
+				break;
+			case 1:
+				mTextTypeface = Typeface.SANS_SERIF;
+				break;
+			case 2:
+				mTextTypeface = Typeface.SERIF;
+				break;
+			case 3:
+				mTextTypeface = Typeface.MONOSPACE;
+				break;
 		}
 
 		res = pref.getString("readlinefeedcode_list", Integer.toString(FTDriverUtil.LINEFEED_CODE_CRLF));
@@ -154,16 +154,18 @@ public class UsbReceiver extends BroadcastReceiver {
 		if (SHOW_DEBUG) {
 			Log.d(TAG, "FTDriver Write(" + strWrite.length() + ") : " + strWrite);
 		}
-		
-		if(mSerial.isConnected()){
-			mSerial.write(strWrite.getBytes(), strWrite.length());
-//			mainloop();
+
+		if(mSerial.isConnected()) {
+			int dd = mSerial.write(strWrite.getBytes(), strWrite.length());
+			((MainActivity)mActivity).onSetText("2- write값 : " + dd);
+			//mainloop();
 		}
 		else
 			Toast.makeText(mContext, "Usb is disconnection", Toast.LENGTH_SHORT).show();
 	}
 
 	public void mainloop() {
+		((MainActivity)mActivity).onSetText("2- mainloop 실행");
 		mStop = false;
 		mRunningMainLoop = true;
 		Toast.makeText(mContext, "connected", Toast.LENGTH_SHORT).show();
@@ -179,7 +181,7 @@ public class UsbReceiver extends BroadcastReceiver {
 			int len;
 			byte[] rbuf = new byte[4096];
 			int bMsgCnt = 0;
-			
+
 			for (;;) {// this is the main loop for transferring
 
 				// ////////////////////////////////////////////////////////
@@ -187,17 +189,17 @@ public class UsbReceiver extends BroadcastReceiver {
 				// ////////////////////////////////////////////////////////
 				len = mSerial.read(rbuf);
 				rbuf[len] = 0;
-				
+
 				if (len > 0) {
-					
-					// �����͸� ������ �迭 �ʱ�ȭ
+
+					// 데이터를 저장할 배열 초기화
 					if(bMsgCnt == 0)
 						mText = new StringBuilder();
-					
-					// ���� ���� ��Ŷ ���̰� ���� ������ ���̺��� �۴ٸ� ������ ���´ٴ� ��
+
+					// 현재 읽은 패킷 길이가 수신 데이터 길이보다 작다면 나눠서 들어온다는 뜻
 					if(len < 33)
 					{
-						// ���� �� ������ �迭�� ���
+						// 나눠 진 데이터 배열에 기록
 						OnReadMessage(rbuf, len);
 						bMsgCnt += len;
 					}
@@ -206,14 +208,15 @@ public class UsbReceiver extends BroadcastReceiver {
 						OnReadMessage(rbuf, len);
 						bMsgCnt = len;
 					}
-					
+
 					if(bMsgCnt >= 33)
 					{
 						bMsgCnt = 0;
-					
+
 						mHandler.post(new Runnable() {
 							public void run() {
 								((MainActivity)mActivity).onSetText(mText.toString());
+								Toast.makeText(mContext, mText.toString(), Toast.LENGTH_SHORT).show();
 							}
 						});
 					}
@@ -232,21 +235,21 @@ public class UsbReceiver extends BroadcastReceiver {
 			}
 		}
 	};
-	
+
 	private void OnReadMessage(byte[] rbuf, int len)
 	{
 		switch (mDisplayType) {
-		case FTDriverUtil.DISP_CHAR:
-			FTDriverUtil.setSerialDataToTextView(mText, mDisplayType, rbuf, len, "", "");
-			break;
-		case FTDriverUtil.DISP_DEC:
-			FTDriverUtil.setSerialDataToTextView(mText, mDisplayType, rbuf, len, "013", "010");
-			break;
-		case FTDriverUtil.DISP_HEX:
-			FTDriverUtil.setSerialDataToTextView(mText, mDisplayType, rbuf, len, "0d", "0a");
-			break;
+			case FTDriverUtil.DISP_CHAR:
+				FTDriverUtil.setSerialDataToTextView(mText, mDisplayType, rbuf, len, "", "");
+				break;
+			case FTDriverUtil.DISP_DEC:
+				FTDriverUtil.setSerialDataToTextView(mText, mDisplayType, rbuf, len, "013", "010");
+				break;
+			case FTDriverUtil.DISP_HEX:
+				FTDriverUtil.setSerialDataToTextView(mText, mDisplayType, rbuf, len, "0d", "0a");
+				break;
 		}
-		
+
 		if (SHOW_DEBUG) {
 			Log.d(TAG, "Read Length : " + len +"/" +mText);
 		}

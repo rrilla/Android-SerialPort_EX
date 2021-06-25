@@ -1,5 +1,6 @@
 package com.example.serialport_rebuild;
 
+import android.hardware.usb.UsbDevice;
 import android.os.Bundle;
 import android.annotation.SuppressLint;
 import android.app.PendingIntent;
@@ -18,6 +19,8 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.driver.serial.FTDriver;
+
+import java.util.ArrayList;
 
 //@SuppressLint("InlinedApi")
 public class MainActivity extends AppCompatActivity {
@@ -46,7 +49,23 @@ public class MainActivity extends AppCompatActivity {
 		etLog = (EditText)findViewById(R.id.strLog);
 		etLog.setFocusable(false);
 		etLog.setClickable(false);
-
+		UsbManager usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
+		for(UsbDevice device : usbManager.getDeviceList().values()) {
+//			UsbSerialDriver driver = usbDefaultProber.probeDevice(device);
+//			if(driver == null) {
+//				driver = usbCustomProber.probeDevice(device);
+//			}
+//			if(driver != null) {
+//				for(int port = 0; port < driver.getPorts().size(); port++){
+//				test.add(0,device);
+//				test.add(1,port);
+//				test.add(2,driver);
+//				test.
+//			} else {
+//				listItems.add(new ListItem(device, 0, null));
+//			}
+			Log.e("HJH", "vendpor - "+device.getVendorId() + "productId - " + device.getProductId());
+		}
 		mSerial = new FTDriver((UsbManager) getSystemService(Context.USB_SERVICE));
 
 		// listen for new devices
