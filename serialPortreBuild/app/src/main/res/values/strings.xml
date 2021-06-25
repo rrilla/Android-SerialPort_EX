@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">serialPort-reBuild</string>
+    <string name="action_Connection">Connection</string>
+    <string name="action_DisConnection">DisConnection</string>
+</resources>
