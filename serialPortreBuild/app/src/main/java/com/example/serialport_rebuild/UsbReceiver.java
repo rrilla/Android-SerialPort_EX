@@ -25,7 +25,7 @@ public class UsbReceiver extends BroadcastReceiver {
 	private Handler mHandler = new Handler();
 	private StringBuilder mText;
 
-	private static final String ACTION_USB_PERMISSION = "kr.co.andante.mobiledgs.USB_PERMISSION";
+	private static final String ACTION_USB_PERMISSION = "com.example.serialport_rebuild.USB_PERMISSION";
 
 	private boolean mStop = false;
 	private boolean mRunningMainLoop = false;
@@ -35,8 +35,8 @@ public class UsbReceiver extends BroadcastReceiver {
 	// Default settings
 	private int mTextFontSize       = 12;
 	private Typeface mTextTypeface  = Typeface.MONOSPACE;
-	private int mDisplayType        = FTDriverUtil.DISP_CHAR;
-	private int mBaudrate           = FTDriver.BAUD9600;
+	private int mDisplayType        = FTDriverUtil.DISP_HEX;
+	private int mBaudrate           = FTDriver.BAUD115200;
 	private int mDataBits           = FTDriver.FTDI_SET_DATA_BITS_8;
 	private int mParity             = FTDriver.FTDI_SET_DATA_PARITY_NONE;
 	private int mStopBits           = FTDriver.FTDI_SET_DATA_STOP_BITS_1;
@@ -63,13 +63,13 @@ public class UsbReceiver extends BroadcastReceiver {
 	// Load default baud rate
 	int loadDefaultBaudrate() {
 		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(mContext);
-		String res = pref.getString("baudrate_list", Integer.toString(FTDriver.BAUD9600));
+		String res = pref.getString("baudrate_list", Integer.toString(FTDriver.BAUD115200));
 		return Integer.valueOf(res);
 	}
 
 	void loadDefaultSettingValues() {
 		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(mContext);
-		String res = pref.getString("display_list", Integer.toString(FTDriverUtil.DISP_CHAR));
+		String res = pref.getString("display_list", Integer.toString(FTDriverUtil.DISP_HEX));
 		mDisplayType = Integer.valueOf(res);
 
 		res = pref.getString("fontsize_list", Integer.toString(12));
@@ -150,12 +150,15 @@ public class UsbReceiver extends BroadcastReceiver {
 
 	public void writeDataToSerial(String strWrite) {
 		strWrite = FTDriverUtil.changeLinefeedcode(strWrite);
+		((MainActivity)mActivity).onSetText("1- " + strWrite);
 		if (SHOW_DEBUG) {
 			Log.d(TAG, "FTDriver Write(" + strWrite.length() + ") : " + strWrite);
 		}
 		
-		if(mSerial.isConnected())
+		if(mSerial.isConnected()){
 			mSerial.write(strWrite.getBytes(), strWrite.length());
+//			mainloop();
+		}
 		else
 			Toast.makeText(mContext, "Usb is disconnection", Toast.LENGTH_SHORT).show();
 	}

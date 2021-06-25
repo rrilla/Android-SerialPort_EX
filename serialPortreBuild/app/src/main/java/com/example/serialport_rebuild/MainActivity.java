@@ -13,20 +13,19 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.driver.serial.FTDriver;
 
-@SuppressLint("InlinedApi")
+//@SuppressLint("InlinedApi")
 public class MainActivity extends AppCompatActivity {
 
 	private FTDriver mSerial;
 	private UsbReceiver mUsbReceiver;
 
-	private static final String ACTION_USB_PERMISSION = "kr.co.andante.mobiledgs.USB_PERMISSION";
+	private static final String ACTION_USB_PERMISSION = "com.example.serialport_rebuild.USB_PERMISSION";
 
 	private Boolean SHOW_DEBUG = false;
 	private String TAG = "HDJ";
@@ -89,6 +88,7 @@ public class MainActivity extends AppCompatActivity {
 		btWrite.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				Toast.makeText(getApplicationContext(), "클릭했다", Toast.LENGTH_SHORT).show();
 				mUsbReceiver.writeDataToSerial(etWrite.getText().toString());
 			}
 		});

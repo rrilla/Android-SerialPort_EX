@@ -23,6 +23,8 @@ import android.hardware.usb.UsbManager;
 import android.hardware.usb.UsbConstants;
 import android.util.Log;
 
+import com.example.serialport_rebuild.MainActivity;
+
 enum FTDICHIPTYPE {
     FT232RL, FT2232C, FT232H, FT2232D, FT2232HL, FT4232HL, FT230X, CDC, NONE;
 }
@@ -43,7 +45,7 @@ class UsbId {
     }
 }
 
-@SuppressLint("NewApi")
+//@SuppressLint("NewApi")
 public class FTDriver {
 
     private static final boolean LOCAL_LOGV = true;
@@ -434,7 +436,7 @@ public class FTDriver {
             System.arraycopy(buf, offset, write_buf, 0, write_size);
             // ByteArrayInputStream write_buf = new ByteArrayInputStream(buf);
             // write_buf.read(tmp_buf, offset, write_size);
-
+//            ((MainActivity)mActivity).onSetText("1- ");
             actual_length = mDeviceConnection.bulkTransfer(
                     mFTDIEndpointOUT[channel], write_buf, write_size, 0);
 
