@@ -30,12 +30,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements SerialInputOutputManager.Listener{
 
-    private enum UsbPermission { Unknown, Requested, Granted, Denied }
-    private static final String INTENT_ACTION_GRANT_USB = "com.example.myserialportcustom.GRANT_USB";
-    private UsbPermission usbPermission = UsbPermission.Unknown;
-
     private UsbSerialPort port;
-    private final Handler mainLooper = new Handler(Looper.getMainLooper());;
     private static final int WRITE_WAIT_MILLIS = 2000;
     private static final int READ_WAIT_MILLIS = 2000;
 
@@ -70,6 +65,7 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
         } catch (IOException e) {
             e.printStackTrace();
         }
+        //이벤트 구동시 읽기 위해 필요. onNewData();
         SerialInputOutputManager usbIoManager = new SerialInputOutputManager(port, this);
         usbIoManager.setReadBufferSize(10000);
         usbIoManager.start();
@@ -81,6 +77,7 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
 
     }
 
+    //입력 데이터 HEX로 변환하여 전송
     private void send(String str) {
         try {
             StringBuilder sb = new StringBuilder();
@@ -96,32 +93,11 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
         }
     }
 
-//    private void receive(byte[] data) {
-////        SpannableStringBuilder spn = new SpannableStringBuilder();
-////        if(data.length > 0)
-////            spn.append(TextUtil.toHexString(data)).append("\n");
-////        tvReceive.append(spn);
-//
-//        if(data.length > 0)
-//            tvReceive.append(TextUtil.toHexString(data) + "\n");
-//    }
-
     @Override
     public void onNewData(byte[] data) {
-//        runOnUiThread(() -> { tvReceive.append(new String(data)); });
-//        runOnUiThread(() -> {
-//            SpannableStringBuilder spn = new SpannableStringBuilder();
-//            //spn.append("receive " + data.length + " bytes\n");
-//            if(data.length > 0)
-//                spn.append(HexDump.dumpHexString(data)).append("\n");
-//            tvReceive.append(spn);
-//        });
-
-//        mainLooper.post(() -> {
-//            receive(data);
-//        });
         runOnUiThread(() -> {
             if(data.length > 0)
+                //받은 HEX 데이터 변환하여 출력
                 tvReceive.append(TextUtil.toHexString(data) + "\n");;
         });
     }
