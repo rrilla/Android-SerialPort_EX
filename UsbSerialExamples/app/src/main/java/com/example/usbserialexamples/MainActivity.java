@@ -33,6 +33,7 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
         return true;
     }
 
+    //현재화면을 다시 부를 때 onCreate 대신 동작
     @Override
     protected void onNewIntent(Intent intent) {
         if("android.hardware.usb.action.USB_DEVICE_ATTACHED".equals(intent.getAction())) {

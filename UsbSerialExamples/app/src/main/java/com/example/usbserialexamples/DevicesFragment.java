@@ -65,6 +65,7 @@ public class DevicesFragment extends ListFragment {
                 else
                     text1.setText(item.driver.getClass().getSimpleName().replace("SerialDriver","")+", Port "+item.port);
                 text2.setText(String.format(Locale.US, "Vendor %04X, Product %04X", item.device.getVendorId(), item.device.getProductId()));
+                text2.setText("deviceName : "+item.device.getDeviceName());
                 return view;
             }
         };
