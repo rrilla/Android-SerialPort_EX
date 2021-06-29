@@ -103,8 +103,8 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
         runOnUiThread(() -> {
             if(data.length > 0)
                 //받은 HEX 데이터 변환하여 출력
-                check(TextUtil.toHexString(data));
-                tvReceive.append(TextUtil.toHexString(data) + "\n");;
+                //tvReceive.append(TextUtil.toHexString(data) + "\n");;
+                check(data);
         });
     }
 
@@ -122,7 +122,20 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
 
 
 
-    private void check(String toHexString) {
+    private void check(byte[] data) {
+//        tvReceive.append("CRC : " + TextUtil.toHexString(fn_makeCRC16(data)) + "\n");;
+        String check = TextUtil.toHexString(Calculate_CRC(data));
+        if(check.equals("00 00")){
+            //CRC 검증 성공
+            String value = TextUtil.toHexString(data);
+            value.indexOf("E2");
+            tvReceive.append("equals 비교" + "\n");;
+        }else{
+            //CRC 검증 실패
+            tvReceive.append("ㅜㅜ" + "\n");
+        }
+        tvReceive.append("CRC : " + TextUtil.toHexString(Calculate_CRC(data)) + "\n");
+        tvReceive.append(TextUtil.toHexString(data) + "\n");;
 
     }
 
@@ -161,23 +174,53 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
                 0x6e17, 0x7e36, 0x4e55, 0x5e74, 0x2e93, 0x3eb2, 0x0ed1, 0x1ef0
     };
 
-    private long Crc16Check(char ptr, char dataLen){
-//        int CRC = 0xffff;   //2byte
-        long CRC = unsigned32(0xffff);
+    public byte[] fn_makeCRC16(byte[] bytes) {
+        int icrc = 0xffff;
         char DataReg;
-        while(dataLen-- != 0) {
-            DataReg=(char) (CRC/256);
-            CRC <<= 8;
-            CRC^=CRC_Table[DataReg^ptr];
-            ptr++;
+        for (byte b : bytes) {
+            DataReg=(char) (icrc/256);
+            icrc <<= 8;
+            icrc ^= CRC_Table[(DataReg ^ b) & 0xff];
         }
-        return CRC;
+        return fnShortToBytes((short)icrc,0);
     }
 
-    public long unsigned32(int n) {
-        return n & 0xFFFFFFFFL;
+    private byte[] Calculate_CRC(byte[] data) {
+        int xorval;
+        char i;
+        int CRCacc = 0xffff;
+        for (byte b : data) {
+            for (i=0; i<8; i++) {
+                xorval = ((CRCacc>>8) ^ (b << i)) & 0x0080;
+                CRCacc = (CRCacc << 1) & 0xfffe;
+                if (xorval==1)
+                    CRCacc ^= 0x1021;
+            }
+        }
+        return fnShortToBytes((short)CRCacc,0);
     }
 
+    public byte[] fnShortToBytes(short Value, int Order) {
+        byte[] temp;
+        temp = new byte[]{ (byte)((Value & 0xFF00) >> 8), (byte)(Value & 0x00FF) };
+        temp = ChangeByteOrder(temp,Order);
+        return temp;
+    }
 
+    private byte[] ChangeByteOrder(byte[] value,int Order) {
+        int idx = value.length;
+        byte[] Temp = new byte[idx];
+        //BIG_EDIAN
+        if(Order == 1) {
+            Temp = value;
+        }
+        //Little_EDIAN
+        else if(Order == 0) {
+            for(int i=0;i<idx;i++) {
+                Temp[i] = value[idx-(i+1)];
+            }
+        }
+        return Temp;
+    }
 
 }
