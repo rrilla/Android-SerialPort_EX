@@ -123,19 +123,29 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
 
 
     private void check(byte[] data) {
-//        tvReceive.append("CRC : " + TextUtil.toHexString(fn_makeCRC16(data)) + "\n");;
-        String check = TextUtil.toHexString(Calculate_CRC(data));
+        String check = TextUtil.toHexString(calculate_CRC(data));
         if(check.equals("00 00")){
             //CRC 검증 성공
             String value = TextUtil.toHexString(data);
-            value.indexOf("E2");
-            tvReceive.append("equals 비교" + "\n");;
+            int index = value.indexOf("E2");
+            if(index != -1){
+                String epc_crc;
+                try{
+                    epc_crc = value.substring(index, index+41);
+                }catch(Exception e){
+                    //카드 다시인식 시켜야 함.
+                    epc_crc = "문자열 자르기 에러 : " + value;
+                }
+                tvReceive.append("EPC : " + epc_crc + "\n");
+            }
         }else{
             //CRC 검증 실패
             tvReceive.append("ㅜㅜ" + "\n");
         }
-        tvReceive.append("CRC : " + TextUtil.toHexString(Calculate_CRC(data)) + "\n");
-        tvReceive.append(TextUtil.toHexString(data) + "\n");;
+
+
+//        tvReceive.append("CRC : " + TextUtil.toHexString(calculate_CRC(data)) + "\n");
+//        tvReceive.append(TextUtil.toHexString(data) + "\n");;
 
     }
 
@@ -174,7 +184,7 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
                 0x6e17, 0x7e36, 0x4e55, 0x5e74, 0x2e93, 0x3eb2, 0x0ed1, 0x1ef0
     };
 
-    public byte[] fn_makeCRC16(byte[] bytes) {
+    public byte[] make_CRC(byte[] bytes) {
         int icrc = 0xffff;
         char DataReg;
         for (byte b : bytes) {
@@ -185,7 +195,7 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
         return fnShortToBytes((short)icrc,0);
     }
 
-    private byte[] Calculate_CRC(byte[] data) {
+    private byte[] calculate_CRC(byte[] data) {
         int xorval;
         char i;
         int CRCacc = 0xffff;
