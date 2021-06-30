@@ -7,7 +7,9 @@ import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.text.SpannableStringBuilder;
+import android.util.Log;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.hoho.android.usbserial.driver.UsbSerialDriver;
@@ -68,6 +70,10 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
         Button btnDisconnect = findViewById(R.id.disconnect);
         btnDisconnect.setOnClickListener(v -> disconnect());
 
+        EditText etInput = findViewById(R.id.inputText);
+        Button btnCRC = findViewById(R.id.crcMake);
+        btnCRC.setOnClickListener(v -> crcMake(etInput.getText().toString()));
+
     }
 
     //입력 데이터 HEX로 변환하여 전송
@@ -103,8 +109,9 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
         runOnUiThread(() -> {
             if(data.length > 0)
                 //받은 HEX 데이터 변환하여 출력
+                check2(data);
                 //tvReceive.append(TextUtil.toHexString(data) + "\n");;
-                check(data);
+//                check(data);
         });
     }
 
@@ -115,7 +122,6 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
 //            disconnect();
 //        });
     }
-
 
 
 
@@ -143,10 +149,45 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
             tvReceive.append("ㅜㅜ" + "\n");
         }
 
-
 //        tvReceive.append("CRC : " + TextUtil.toHexString(calculate_CRC(data)) + "\n");
 //        tvReceive.append(TextUtil.toHexString(data) + "\n");;
+    }
 
+    private void check2(byte[] data) {
+        String check = TextUtil.toHexString(data);
+        if(check.contains("AA AA FF")){
+            //AA AA FF 검증 성공
+            //tvReceive.append("input length : " + check.substring(9,11) + "\n"); //06
+            int checkLength = 0;
+            try{
+                checkLength = Integer.parseInt(check.substring(9,11))+3;
+            }catch(Exception e) {}
+            if(checkLength == data.length){
+                tvReceive.append("길이 검증 정상 데이터 : ");
+            }else{
+                tvReceive.append("길이 검증 비정상 데이터 : ");
+            }
+            tvReceive.append(check + "\n");;
+        }else{
+            //AA AA FF 검증 실패
+            tvReceive.append("AA AA FF 검증실패 : " + check + "\n");
+        }
+
+    }
+
+    private void crcMake(String str){
+        tvReceive.append("입력값 : " + str + "\n");
+        try {
+            StringBuilder sb = new StringBuilder();
+            TextUtil.toHexString(sb, TextUtil.fromHexString(str));
+            TextUtil.toHexString(sb, "\r\n".getBytes());
+            String msg = sb.toString();
+            byte[] data = TextUtil.fromHexString(msg);
+            String crc = TextUtil.toHexString(make_CRC(data));
+            tvReceive.append("CRC : " + crc);
+        } catch (Exception e) {
+            onRunError(e);
+        }
     }
 
     int[] CRC_Table={
