@@ -11,6 +11,7 @@ import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.hoho.android.usbserial.driver.UsbSerialDriver;
 import com.hoho.android.usbserial.driver.UsbSerialPort;
@@ -28,6 +29,7 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
     private static final int READ_WAIT_MILLIS = 2000;
 
     TextView tvReceive;
+    private byte[] pieceData = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,7 +111,7 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
         runOnUiThread(() -> {
             if(data.length > 0)
                 //받은 HEX 데이터 변환하여 출력
-                check2(data);
+                dataCheck(data);
                 //tvReceive.append(TextUtil.toHexString(data) + "\n");;
 //                check(data);
         });
@@ -172,7 +174,69 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
             //AA AA FF 검증 실패
             tvReceive.append("AA AA FF 검증실패 : " + check + "\n");
         }
+    }
 
+    private void dataCheck(byte[] data){
+        tvReceive.append("0");
+        if(pieceData != null){
+            if(pieceData.length > 100){
+                pieceData = null;
+                return;
+            }
+            tvReceive.append("1");
+            //배열 합치기
+            byte[] dataSum = new byte[pieceData.length + data.length];
+            System.arraycopy(pieceData, 0, dataSum, 0, pieceData.length);
+            System.arraycopy(data, 0, dataSum, pieceData.length, data.length);
+            data = dataSum;
+
+            pieceData = null;
+        }
+        tvReceive.append("2");
+        String dataToString = TextUtil.toHexString(data);
+        String epc = "0";
+        int index = dataToString.indexOf("AA AA FF");
+        if(index != -1){
+            tvReceive.append("3");
+            //AA AA FF 다음 총길이 10진수로 변환
+            int dataLength = -1;
+            try{
+                dataLength = Integer.parseInt(dataToString.substring(index+9, index+11),16) + 3;
+            }catch(Exception ignore) {
+                pieceData = data;
+                return;
+            }
+//            tvReceive.append("allData : " + dataToString + "\n");
+//            tvReceive.append("myDataLength : " + dataLength + "\n");
+//            tvReceive.append("resDataLength : " + data.length + "\n---------------------------------------");
+            if(dataLength == data.length){
+                tvReceive.append("데이터 정상 : " + dataToString + "\n");
+//                int index2 = dataToString.indexOf("E2");
+//                if(index2 != -1){
+//                    try{
+//                        epc = dataToString.substring(index2, index2+35).replaceAll(" ", "");
+//                        tvReceive.append("try epc 추출 : " + epc);
+//                    }catch(Exception e){
+//                        //카드 다시인식 시켜야 함.
+//                        epc = "문자열 자르기 에러 : " + dataToString;
+//                        tvReceive.append("try epc 추출실패 : " + epc);
+//                    }
+//                }
+            }else{
+                if(dataLength > data.length){
+                    tvReceive.append("5");
+                    pieceData = data;
+                    return;
+                }else{
+                    
+                }
+            }
+        }else{
+            tvReceive.append("6");
+            //패킷 보관 후 뒤 패킷이랑 합침
+            pieceData = data;
+            return;
+        }
     }
 
     private void crcMake(String str){
