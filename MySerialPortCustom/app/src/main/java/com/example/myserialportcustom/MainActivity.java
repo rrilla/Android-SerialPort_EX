@@ -228,7 +228,7 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
                     pieceData = data;
                     return;
                 }else{
-                    
+
                 }
             }
         }else{
