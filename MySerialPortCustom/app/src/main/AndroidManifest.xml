@@ -18,10 +18,12 @@
 
             <intent-filter>
                 <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />
+                <!-- USB Device 가 연결될때의 Action이라고 알려준다 -->
             </intent-filter>
             <meta-data
                 android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED"
                 android:resource="@xml/device_filter" />
+            <!-- USB Device 정보가 res\xml\device_filter.xml 에 있다고  알려 준다 -->
         </activity>
     </application>
 
