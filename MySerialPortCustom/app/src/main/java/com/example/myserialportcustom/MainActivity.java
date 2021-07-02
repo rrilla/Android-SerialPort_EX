@@ -23,7 +23,8 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements SerialInputOutputManager.Listener{
 
-    private UsbSerialPort port;
+    private UsbSerialPort usbSerialPort;
+    private SerialInputOutputManager usbIoManager;
     private static final int WRITE_WAIT_MILLIS = 2000;
     private static final int READ_WAIT_MILLIS = 2000;
 
@@ -51,22 +52,24 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
             return;
         }
 
-        port = driver.getPorts().get(0); // Most devices have just one port (port 0)
+        usbSerialPort = driver.getPorts().get(0); // Most devices have just one port (port 0)
         try {
-            port.open(connection);
-            port.setParameters(115200, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
+            usbSerialPort.open(connection);
+            usbSerialPort.setParameters(115200, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
         } catch (IOException e) {
             e.printStackTrace();
         }
         //이벤트 구동시 읽기 위해 필요. onNewData();
-        SerialInputOutputManager usbIoManager = new SerialInputOutputManager(port, this);
+        usbIoManager = new SerialInputOutputManager(usbSerialPort, this);
         usbIoManager.setReadBufferSize(10000);
         usbIoManager.start();
 
         Button btnStart = findViewById(R.id.start);
-        btnStart.setOnClickListener(v -> send("AA AA FF 08 C1 02 05 00 BC A9 24"));
+        btnStart.setOnClickListener(v -> send("AA AA FF 08 C1 02 05 00 BC A9 24"));//multi tag start
         Button btnStop = findViewById(R.id.stop);
-        btnStop.setOnClickListener(v -> send("AA AA FF 05 C0 00 B3 F7"));
+        btnStop.setOnClickListener(v -> send("AA AA FF 05 C0 00 B3 F7"));//multi tag stop
+        Button btnDisconnect = findViewById(R.id.disconnect);
+        btnDisconnect.setOnClickListener(v -> disconnect());
 
     }
 
@@ -80,10 +83,22 @@ public class MainActivity extends AppCompatActivity implements SerialInputOutput
             byte[] data = TextUtil.fromHexString(msg);
             SpannableStringBuilder spn = new SpannableStringBuilder(msg + '\n');
             tvReceive.append(spn);
-            port.write(data, WRITE_WAIT_MILLIS);
+            usbSerialPort.write(data, WRITE_WAIT_MILLIS);
         } catch (Exception e) {
             onRunError(e);
         }
+    }
+
+    private void disconnect() {
+        if(usbIoManager != null) {
+            usbIoManager.setListener(null);
+            usbIoManager.stop();
+        }
+        usbIoManager = null;
+        try {
+            usbSerialPort.close();
+        } catch (IOException ignored) {}
+        usbSerialPort = null;
     }
 
     @Override
